@@ -12,7 +12,9 @@ RUN pip install --upgrade pip \
     && pip install scipy \
     && pip install pandas \
     && pip install scikit-learn \
-    && pip install cloudpickle
+    && pip install cloudpickle \
+    && pip install boto3 \
+    && pip install botocore
 RUN mkdir /artifacts
 ENTRYPOINT ["mlflow","server","--expose-prometheus=./metrics","--default-artifact-root=s3://mlflow/artifacts","--backend-store-uri=/mlflow","--host=0.0.0.0"]
 

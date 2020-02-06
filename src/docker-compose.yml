@@ -19,17 +19,18 @@ services:
       - minio
     environment:
       - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
-      - AWS_ACCESS_KEY_ID=minio_access_key
-      - AWS_SECRET_ACCESS_KEY=minio_secret_key
+      - AWS_ACCESS_KEY_ID=minio-access-key
+      - AWS_SECRET_ACCESS_KEY=minio-secret-key
   mycondaenv:
     build: ./conda3-docker
     image: 'vsemashkin/conda3'
     environment:
       - GRANT_SUDO="yes"
       - MLFLOW_TRACKING_URI=http://mymlflow:5000
+      - MLFLOW_ARTIFACT_URI=http://mymlflow:5000
       - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
-      - AWS_ACCESS_KEY_ID=minio_access_key
-      - AWS_SECRET_ACCESS_KEY=minio_secret_key
+      - AWS_ACCESS_KEY_ID=minio-access-key
+      - AWS_SECRET_ACCESS_KEY=minio-secret-key
     ports:
       - '8888:8888'
     volumes:

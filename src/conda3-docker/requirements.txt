@@ -1,2 +1,4 @@
 untangle
 mlflow
+boto3
+botocore
