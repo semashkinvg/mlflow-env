@@ -3,23 +3,40 @@ volumes:
   prometheus_data: {}
   grafana_data: {}
 services:
+  minio:
+    image: 'bitnami/minio:latest'
+    ports:
+      - '9983:9000'
+    environment:
+      - MINIO_ACCESS_KEY=minio-access-key
+      - MINIO_SECRET_KEY=minio-secret-key
   mymlflow:
     build: ./mlflow-docker
     image: 'vsemashkin/mymlflow:latest'
     ports:
       - '5544:5000'
+    links:
+      - minio
+    environment:
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - AWS_ACCESS_KEY_ID=minio_access_key
+      - AWS_SECRET_ACCESS_KEY=minio_secret_key
   mycondaenv:
     build: ./conda3-docker
     image: 'vsemashkin/conda3'
     environment:
       - GRANT_SUDO="yes"
       - MLFLOW_TRACKING_URI=http://mymlflow:5000
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - AWS_ACCESS_KEY_ID=minio_access_key
+      - AWS_SECRET_ACCESS_KEY=minio_secret_key
     ports:
       - '8888:8888'
     volumes:
       - .:/opt/notebooks 
     links:
       - mymlflow
+      - minio
     entrypoint: sh -c 'jupyter lab --allow-root --ip=* --port=8888 --no-browser --notebook-dir=/opt/notebooks'
   prometheus:
     image: prom/prometheus:v2.1.0
@@ -51,3 +68,4 @@ services:
     env_file:
       - ./grafana/config.monitoring
     restart: always
+  
