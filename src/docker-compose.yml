@@ -3,6 +3,16 @@ volumes:
   prometheus_data: {}
   grafana_data: {}
 services:
+
+  dbpostgres:
+    image: postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: mlflow_db
+      POSTGRES_USER: sa
+      POSTGRES_PASSWORD: example
   minio:
     image: 'bitnami/minio:latest'
     ports:
@@ -15,8 +25,11 @@ services:
     image: 'vsemashkin/mymlflow:latest'
     ports:
       - '5544:5000'
+    depends_on:
+      - dbpostgres
     links:
       - minio
+      - dbpostgres
     environment:
       - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
       - AWS_ACCESS_KEY_ID=minio-access-key
@@ -35,6 +48,9 @@ services:
       - '8888:8888'
     volumes:
       - .:/opt/notebooks 
+    depends_on:
+      - mymlflow
+      - minio
     links:
       - mymlflow
       - minio
@@ -51,6 +67,8 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
     ports:
       - 9090:9090
+    depends_on:
+      - mymlflow
     links:
       - mymlflow
     restart: always
